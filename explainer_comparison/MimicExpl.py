@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------------------------------
-# Class Explainable Boosting Machine
+# Class MimicExpl
 #
-# This class wraps the interpret.glassbox.ExplainableBoostingRegressor and ExplainableBoostingClassifier explainer methods
+# This class wraps the interpret.ext.blackbox.MimicExplainer explainer method
 #
 # ------------------------------------------------------------------------------------------------------
 from interpret.ext.blackbox import MimicExplainer
@@ -26,34 +26,36 @@ class MimicExpl(Explainer):
 
     def __init__(self, model, X_train, y_train, y_pred=None, mode='regression'):
         super().__init__(model, X_train, y_train, y_pred, mode)
-        self.create_explainer()
 
-    def create_explainer(self):
-        self.explainer = MimicExplainer(self.model, 
-                           self.X_train, 
-                           LGBMExplainableModel, 
-                           augment_data=True, 
-                           max_num_of_augmentations=10)
-                        #    features=data.feature_names, 
-                        #    classes=data.target_names.tolist())
-        
-        # self.explainer.fit(self.X_train, self.y_train)
-        return self.explainer
+        self.explainer = MimicExplainer(
+            self.model,
+            self.X_train,
+            LGBMExplainableModel,
+            augment_data=True,
+            max_num_of_augmentations=10,
+            model_task=self.mode,
+            classes=list(self.y_train.unique()) if self.mode == 'classification' else None,
+            explainable_model_args={
+                'objective': 'binary' if len(self.y_train.unique())==2 else self.mode,
+            }
+        )
     
     def predict(self, X_data: pd.DataFrame) -> pd.DataFrame:
-        y_pred = self.explainer._get_surrogate_model_predictions(X_data)
+        if self.mode=='classification' and len(self.y_train.unique()==2):
+            y_pred_proba = self.predict_proba(X_data)
+            y_pred = (y_pred_proba >= 0.5).astype(int)
+        else:
+            y_pred = self.explainer._get_surrogate_model_predictions(X_data)
 
-        y_pred = pd.Series(y_pred).replace(to_replace=['malignant', 'benign'], value=[0, 1]).to_numpy()
-
-        # return self.explainer.predict(X_data)
         return y_pred
     
     def predict_proba(self, X_data: pd.DataFrame) -> pd.DataFrame:
-        return np.zeros(shape=len(X_data), dtype=float)
-        # if self.mode != 'regression':
-        #     return self.explainer.predict_proba(X_data)
-        # else:
-        #     raise NotImplementedError('predict_proba is not available for the regression mode')
+
+        if self.mode != 'regression':
+            return self.explainer.surrogate_model.predict(X_data)
+        
+        else:
+            raise NotImplementedError('predict_proba is not available for the regression mode')
 
 
 

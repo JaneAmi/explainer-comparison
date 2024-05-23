@@ -19,16 +19,14 @@ class EBM(Explainer):
 
     def __init__(self, model, X_train, y_train, y_pred=None, mode='regression'):
         super().__init__(model, X_train, y_train, y_pred, mode)
-        self.create_explainer()
-
-    def create_explainer(self):
+       
         if self.mode == 'regression':
             self.explainer = interpret.glassbox.ExplainableBoostingRegressor()
         else:
             self.explainer = interpret.glassbox.ExplainableBoostingClassifier()
         
         self.explainer.fit(self.X_train, self.y_train)
-        return self.explainer
+
     
     def predict(self, X_data: pd.DataFrame) -> pd.DataFrame:
         return self.explainer.predict(X_data)
