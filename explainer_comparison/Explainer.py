@@ -12,11 +12,13 @@ class Explainer(ABC):
                  model,
                  X_train: pd.DataFrame,
                  y_train: pd.DataFrame,
-                 y_pred: pd.DataFrame = None):
+                 y_pred: pd.DataFrame = None,
+                 mode: str = 'regression'):
         self.model = model
         self.X_train = X_train
         self.y_train: pd.DataFrame = y_train
         self.y_pred: pd.DataFrame = y_pred
+        self.mode: str = mode
 
     @abstractmethod
     def explain_global(self, x_data: pd.DataFrame) -> pd.DataFrame:
