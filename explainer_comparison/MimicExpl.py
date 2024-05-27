@@ -17,15 +17,14 @@ import pandas as pd
 
 from Explainer import Explainer
 
-# # Handle it later
-# import warnings
-# warnings.filterwarnings("ignore", category=UserWarning, message=".*X does not have valid feature names.*")
-
 
 class MimicExpl(Explainer):
 
     def __init__(self, model, X_train, y_train, y_pred=None, mode='regression'):
         super().__init__(model, X_train, y_train, y_pred, mode)
+        self.create_explainer()
+
+    def create_explainer(self):
 
         self.explainer = MimicExplainer(
             self.model,
@@ -58,12 +57,13 @@ class MimicExpl(Explainer):
             raise NotImplementedError('predict_proba is not available for the regression mode')
 
 
+    def explain_local(self, X_data: pd.DataFrame) -> pd.DataFrame:
+        return self.explainer.explain_local(X_data)
+
 
     def explain_global(self, X_data: pd.DataFrame) -> pd.DataFrame:
         return self.explainer.explain_global()
 
 
-    def explain_local(self, X_data: pd.DataFrame) -> pd.DataFrame:
-        return self.explainer.explain_local(X_data)
 
 
