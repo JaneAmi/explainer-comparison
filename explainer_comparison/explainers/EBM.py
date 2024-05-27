@@ -19,7 +19,10 @@ class EBM(Explainer):
 
     def __init__(self, model, X_train, y_train, y_pred=None, mode='regression'):
         super().__init__(model, X_train, y_train, y_pred, mode)
-       
+        self._create_explainer()
+
+    def _create_explainer(self):
+
         if self.mode == 'regression':
             self.explainer = interpret.glassbox.ExplainableBoostingRegressor()
         else:

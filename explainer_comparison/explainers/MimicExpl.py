@@ -22,10 +22,9 @@ class MimicExpl(Explainer):
 
     def __init__(self, model, X_train, y_train, y_pred=None, mode='regression'):
         super().__init__(model, X_train, y_train, y_pred, mode)
-        self.create_explainer()
+        self._create_explainer()
 
-    def create_explainer(self):
-
+    def _create_explainer(self):
         self.explainer = MimicExplainer(
             self.model,
             self.X_train,
@@ -36,6 +35,7 @@ class MimicExpl(Explainer):
             classes=list(self.y_train.unique()) if self.mode == 'classification' else None,
             explainable_model_args={
                 'objective': 'binary' if len(self.y_train.unique())==2 else self.mode,
+                'verbose': -1
             }
         )
     
