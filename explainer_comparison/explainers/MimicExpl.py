@@ -26,7 +26,9 @@ class MimicExpl(Explainer):
 
     def __init__(self, model, X_train, y_train, y_pred=None, mode='regression'):
         super().__init__(model, X_train, y_train, y_pred, mode)
+        self._create_explainer()
 
+    def _create_explainer(self):
         self.explainer = MimicExplainer(
             self.model,
             self.X_train,
