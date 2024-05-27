@@ -37,6 +37,7 @@ class MimicExpl(Explainer):
             classes=list(self.y_train.unique()) if self.mode == 'classification' else None,
             explainable_model_args={
                 'objective': 'binary' if len(self.y_train.unique())==2 else self.mode,
+                'verbose': -1
             }
         )
     

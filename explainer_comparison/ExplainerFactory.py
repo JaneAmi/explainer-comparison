@@ -11,8 +11,7 @@ import pandas as pd
 import xgboost as xgb
 
 from Explainer import Explainer
-from LIME import LIME
-from SHAP import SHAP
+from explainers import LIME, SHAP 
 
 
 class ExplainerFactory:
