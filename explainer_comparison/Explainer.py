@@ -5,6 +5,7 @@
 # ------------------------------------------------------------------------------------------------------
 from abc import ABC, abstractmethod
 import pandas as pd
+from constants import MODE
 
 
 class Explainer(ABC):
@@ -13,7 +14,7 @@ class Explainer(ABC):
                  X_train: pd.DataFrame,
                  y_train: pd.DataFrame,
                  y_pred: pd.DataFrame = None,
-                 mode: str = 'regression'):
+                 mode: str = MODE.REGRESSION):
         self.model = model
         self.X_train = X_train
         self.y_train: pd.DataFrame = y_train

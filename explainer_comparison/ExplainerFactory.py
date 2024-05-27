@@ -12,46 +12,34 @@ import xgboost as xgb
 
 from Explainer import Explainer
 from explainers import LIME, SHAP 
+from constants import MODE
 
 
 class ExplainerFactory:
     # If user wants to use XGBoost explanation, model, X, and y must be filled in as parameters for init
     # all possible parameters are set to None as default.
-    '''def __init__(self,
-                 model: Any = None,
-                 X: pd.DataFrame = None,
-                 y: pd.DataFrame = None,
-                 val_X: pd.DataFrame = None,
-                 train_X: pd.DataFrame = None,
-                 val_y: pd.DataFrame = None,
-                 train_y: pd.DataFrame = None):
-        self.model = model
-        self.X = X
-        self.y = y
-        self.val_X = val_X
-        self.val_y = val_y
-        self.train_X = train_X
-        self.train_y = train_y'''
-
+    
     def __init__(self,
                  model: Any = None,
                  X_train: pd.DataFrame = None,
                  X_test: pd.DataFrame = None,
                  y_train: pd.DataFrame = None,
-                 y_test: pd.DataFrame = None):
+                 y_test: pd.DataFrame = None,
+                 mode: str = MODE.REGRESSION):  # Default to REGRESSION
         self.model = model
         self.X_train = X_train
         self.X_test = X_test
         self.y_train = y_train
         self.y_test = y_test
+        self.mode = mode
 
 
     def create_explainer(self, explainer_type: string) -> Explainer:
         if explainer_type == "shap":
-            shapEx = SHAP(self.model, self.X_train, self.y_train)
+            shapEx = SHAP(self.model, self.X_train, self.y_train, mode=self.mode)
             return shapEx
         elif explainer_type == "lime":
-            limeEx = LIME(self.model, self.X_train, self.y_train)
+            limeEx = LIME(self.model, self.X_train, self.y_train, mode=self.mode)
             return limeEx
         #elif explainer_type == "xgboost":
         #    return self.create_xgb_global_feature_importance(self.model, self.X, self.y)

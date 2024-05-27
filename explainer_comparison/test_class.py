@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------------------------
-# Main file for testing
+# file for testing printing Lime and SHAP for binary classification
 #
 #
 # ------------------------------------------------------------------------------------------------------
@@ -9,53 +9,46 @@ import pandas as pd
 import numpy as np
 
 # Third party imports
-from sklearn.datasets import fetch_california_housing
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import mean_squared_error, classification_report, accuracy_score, f1_score, precision_score, recall_score
+from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import seaborn as sns
+from lime import lime_tabular
 
 # Local application imports
 from ExplainerFactory import ExplainerFactory
 from explainer_utilities import run_and_collect_explanations
 
-# Use a dataset from the sklearn library for housing prices
-dataset_1 = fetch_california_housing(as_frame=True)
-X = dataset_1['data']
-y = dataset_1['target']
 
-# Cut dataset for processing speed goal
-X_small = X[:1000]
-y_small = y[:1000]
+# Load the Breast Cancer dataset
+data = load_breast_cancer()
 
-# Splits into X and Y first and then splits it further into validation data and training data
-X_train, X_test, y_train, y_test = train_test_split(X_small, y_small, test_size=0.2)
+# Create a DataFrame with feature names
+X = pd.DataFrame(data.data, columns=data.feature_names)
+
+# Create a Series for the target variable
+y = pd.Series(data.target, name='target')
 
 
-# Initialize the scaler
-scaler = StandardScaler()
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-# Normalize the training data
-train_X_scaled = scaler.fit_transform(X_train)
 
-# Normalize the validation data using the same scaler
-val_X_scaled = scaler.transform(X_test)
-
-# Convert scaled data back to DataFrame
-X_train = pd.DataFrame(train_X_scaled, columns=X_train.columns)
-X_test = pd.DataFrame(val_X_scaled, columns=X_test.columns)
 
 
 # Create a random forest model then train it
 print('\n Training a model ...')
-my_model = RandomForestRegressor(random_state=0)
-my_model.fit(X_train, y_train)
+# Initialize and train the XGBoost Classifier
+model = XGBClassifier(use_label_encoder=False, eval_metric='mlogloss')
+model.fit(X_train, y_train)
 print('\n Model trained')
 
 # Initialize the ExplainerFactory with the trained model and data splits.
 
-expl_fctry = ExplainerFactory(my_model, X_train, X_test, y_train, y_test)
+expl_fctry = ExplainerFactory(model, X_train, X_test, y_train, y_test)
 
 results = run_and_collect_explanations(expl_fctry, X_test)
 print(results)
