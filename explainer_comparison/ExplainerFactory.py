@@ -11,7 +11,7 @@ import pandas as pd
 import xgboost as xgb
 
 from Explainer import Explainer
-from explainers import LIME, SHAP 
+from explainers import LIME, SHAP, EBM, MimicExpl
 from constants import MODE
 
 
@@ -41,6 +41,14 @@ class ExplainerFactory:
         elif explainer_type == "lime":
             limeEx = LIME(self.model, self.X_train, self.y_train, mode=self.mode)
             return limeEx
+        elif explainer_type == "ebm":
+            ebmEx = EBM(self.model, self.X_train, self.y_train, mode=self.mode)
+            return ebmEx
+        elif explainer_type == "mimic":
+            mimicEx = MimicExpl(self.model, self.X_train, self.y_train, mode=self.mode)
+            return mimicEx
+
+
         #elif explainer_type == "xgboost":
         #    return self.create_xgb_global_feature_importance(self.model, self.X, self.y)
 
