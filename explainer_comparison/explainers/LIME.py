@@ -22,6 +22,8 @@ class LIME(Explainer):
     def __init__(self, model, X_train: pd.DataFrame, y_train: pd.DataFrame, y_pred: pd.DataFrame = None, mode: str = 'regression'):
         super().__init__(model, X_train, y_train, y_pred, mode)
         self.explainer = None
+        self.class_names = list(y_train.unique())
+        print(self.class_names)
         self.create_explainer()
 
 
@@ -29,7 +31,7 @@ class LIME(Explainer):
         self.explainer = lime.lime_tabular.LimeTabularExplainer(
             training_data=self.X_train.values,
             feature_names=self.X_train.columns,
-            class_names=list(self.y_train.unique()) if self.mode == MODE.CLASSIFICATION else None,
+            class_names=self.class_names if self.mode == MODE.CLASSIFICATION else None,
             mode=self.mode
         )
 
@@ -44,6 +46,7 @@ class LIME(Explainer):
                 data_row=row, 
                 predict_fn=self.model.predict_proba if self.mode == MODE.CLASSIFICATION else self.model.predict,
                 num_features=len(X_data.columns),
+                labels=self.class_names,
                 num_samples=100
                 )
             sorted_exps = sorted(exp.local_exp[1])
@@ -91,8 +94,10 @@ class LIME(Explainer):
             lime_pred_estimation = np.zeros(shape=num_rows, dtype=float)
             # Iterate over each instance in the input data
             for i, instance in X_data.reset_index(drop=True).iterrows():
-                exp = self.explainer.explain_instance(instance, predict_fn=self.model.predict_proba, num_features=num_features)
+                exp = self.explainer.explain_instance(instance.values, predict_fn=self.model.predict_proba, labels=self.class_names, num_features=num_features)
                 # Store the local prediction
+                print(exp.local_pred)
+                print(exp.predict_proba)
                 lime_pred_estimation[i] = exp.local_pred.item()
             # Clip the predicted probabilities to be within the range [0, 1]
             lime_pred_estimation = np.clip(lime_pred_estimation, 0, 1)
